@@ -1,0 +1,27 @@
+{
+    "name": "pyther/json",
+    "description": "JSON to/from model (de)serialization",
+    "type": "library",
+    "keywords": [
+        "JSON",
+        "serialize",
+        "deserialize",
+        "model"
+    ],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Pyther\\Json\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Peter Grundmann",
+            "email": "peter.grundmann.de@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php" : ">=8.2"
+    }
+}

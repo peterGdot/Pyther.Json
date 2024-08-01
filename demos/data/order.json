@@ -1,0 +1,17 @@
+{
+    "Id": 1234,
+    "ExternId": "1234-abcd-efgh-5678",
+    "Channel": "Amazing",
+    "Ignore": "abc",
+    "Items": [
+        {
+            "Sku": "123"
+        },
+        {
+            "Sku": "456"
+        }
+    ],
+    "PrimaryItem" : {
+        "Sku": "primary"
+    }
+}

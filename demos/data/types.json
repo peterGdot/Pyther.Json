@@ -1,0 +1,42 @@
+{
+    "protectedProperty": 123,
+    "publicProperty": 123,
+    "intProperty": 123,
+    "intPropertyNullable": 123,
+    "stringProperty": "abc",
+    "stringPropertyNullable": "abc",
+    "intOrStringProperty": "abc123",
+    "intOrStringPropertyNullable": "abc123",
+    "dateTimeProperty": "1981-02-04T16:17:18.193Z",
+    "dateTimePropertyByMeta": "04/02/1981",
+    "orderItem": {
+        "sku": "123-456-789"
+    },
+    "orderItemNullable":
+    {
+        "sku": "987-654-321"
+    },
+    "typedArrayByHint": [
+        {
+            "sku": "111-222-333"
+        },
+        {
+            "sku": "444-555-666"
+        }   
+    ],
+    "typedArrayByMeta":  [
+        {
+            "sku": "333-222-111"
+        },
+        {
+            "sku": "666-555-444",
+            "parent":
+            {
+                "sku": "pa-re-nt"
+            }  
+        }   
+    ],
+    "intByHint": 123,
+    "intNullableByHint" : 123,
+    "intByMeta": 123
+}
