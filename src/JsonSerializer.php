@@ -2,6 +2,7 @@
 namespace Pyther\Json;
 
 use Pyther\Json\Attributes\JsonDateTime;
+use Pyther\Json\Attributes\JsonEnum;
 
 /**
  * @property JsonSerializeSettings $settings
@@ -61,12 +62,17 @@ class JsonSerializer extends BaseExecuter
                 $format = $dateTimeMetaFormat !== null ? $dateTimeMetaFormat[0] : $this->settings->dataTimeFormat;
                 $dateTimeFormated = $object->{$name}->format($format);
                 $data[$jsonName] = $dateTimeFormated;
-            } 
-            // c) special case: nested objects
+            }
+            // c) special case: enum
+            else if ($typeInfo->type !== null && enum_exists($typeInfo->type))
+            {
+                $data[$jsonName] = $this->serializeEnum($prop, $object->{$name});
+            }            
+            // d) special case: nested objects
             else if ($typeInfo->type != null && TypeInfo::isUserType($typeInfo->type)) {
                 $data[$jsonName] = $this->serializeObject($object->{$name});
             } 
-            // d) default case
+            // e) default case
             else {
                 $data[$jsonName] = $object->{$name};
             }
@@ -96,5 +102,20 @@ class JsonSerializer extends BaseExecuter
             }
         }
         return $data;
+    }
+
+    private function serializeEnum(\ReflectionProperty $property, $value) {
+        if ($value === null) {
+            return null;
+        }
+        $enumMeta = Meta::getPropertyMetaArguments($property, JsonEnum::class);
+        $enumFormat = $enumMeta !== null ? $enumMeta[0] : ($this->settings->enumFormat ?? JsonEnum::Value);
+        if ($enumFormat === JsonEnum::Name) {
+            return $value->name ?? $value;
+        } else if ($enumFormat === JsonEnum::Full) {
+            return $this->serializeObject($value);
+        } else {
+            return $value;    
+        }
     }
 }

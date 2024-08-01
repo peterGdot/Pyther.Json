@@ -6,5 +6,7 @@ namespace Pyther\Json;
  */
 class JsonSerializeSettings extends JsonSettings
 {
-    public $dateTimeAsString = true; 
+    public $dateTimeAsString = true;
+
+    public $enumFormat = "value";
 }

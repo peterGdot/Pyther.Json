@@ -2,11 +2,14 @@
 
 A lightweight JSON (de)serializer between json and a data model with the following features:
 
-- pre defined or custom naming policies
-- meta/attribute support
-- takes documentation "@var" hints into account
 - support for nested arrays and objects
-- (de)serialization options like date/time format
+- pre defined or custom naming policies
+- meta/attribute support for
+  - property exclusion
+  - (array) type
+  - datetime format
+  - enum format
+- takes documentation "@var" hints into account
 - no external dependencies  
 
 Requirements:
@@ -69,6 +72,7 @@ Define a datatype for a single property. This is especially useful for arrays du
 
 ```php
 use Pyther\Json\Attributes\JsonType;
+
 class MyClass
 {
     // definfes the type of the array items.
@@ -85,10 +89,24 @@ class MyClass
 Allow to define a date/time format for a single property.
 ```php
 use Pyther\Json\Attributes\JsonDateTime;
+
 class MyClass
 {
     // parse this property by the given format.
     #[JsonDateTime("d/m/Y")]
     public string $dayOfBirth;
+}
+```
+
+### JsonEnum
+Allow to define the enum serialization format for a single property.
+```php
+use Pyther\Json\Attributes\JsonEnum;
+
+class MyClass
+{
+    // parse this property by the given format.
+    #[JsonEnum(JsonEnum::Name)]
+    public Status $status;
 }
 ```

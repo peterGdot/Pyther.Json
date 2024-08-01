@@ -107,12 +107,12 @@ class JsonDeserializer extends BaseExecuter
                 $object->{$name} = $dateTime;
             }
             // c) special case: enum
-            else if (enum_exists($typeInfo->type))
+            else if ($typeInfo->type !== null && enum_exists($typeInfo->type))
             {
                 $object->{$name} = static::getEnum($typeInfo->type, $data[$jsonName], $name);
             }
             // d) special case: nested objects
-            else if ($typeInfo->type != null && TypeInfo::isUserType($typeInfo->type)) {
+            else if ($typeInfo->type !== null && TypeInfo::isUserType($typeInfo->type)) {
                 $item = static::createObject($typeInfo->type, $reflObject->getNamespaceName());
                 $object->{$name} = $this->fillObject($item, $data[$jsonName]);
             } 
@@ -150,7 +150,21 @@ class JsonDeserializer extends BaseExecuter
         }
         try {
             $enumRefl = new \ReflectionEnum($enumClass);
-            return $enumRefl->getCase($value)->getValue();
+            
+            // find by name
+            $result = $enumRefl->hasCase($value) ? $enumRefl->getCase($value)->getValue() : null;
+
+            // find by value
+            // tryFrom seems to be buggy :/
+            // $result = $enumClass::tryFrom($value);
+            if ($result === null  && $enumRefl->isBacked()) {
+                foreach ($enumRefl->getCases() as $case) {
+                    if ($case->getBackingValue() == $value) {
+                        return $case->getValue();
+                    }
+                }
+            }
+            return $result;
         } catch (Exception $ex) {
             throw new JsonException($ex->getMessage(), $propertyName);
         }
