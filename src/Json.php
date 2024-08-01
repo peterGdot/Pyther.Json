@@ -16,7 +16,12 @@ abstract class Json
         return (new JsonDeserializer($settings))->deserialize($jsonOrData, $objectOrClass);
     }
 
-    public static function Serialize(object|array $objectOrArray, ?JsonSettings $settings = null): ?string
+    public static function deserializeArrayOf(string|array $jsonOrData, string $itemClass, ?JsonSettings $settings = null): ?array
+    {
+        return (new JsonDeserializer($settings))->deserializeArrayOf($jsonOrData, $itemClass);
+    }
+
+    public static function serialize(object|array $objectOrArray, ?JsonSettings $settings = null): ?string
     {
         return (new JsonSerializer($settings))->serialize($objectOrArray);
     }

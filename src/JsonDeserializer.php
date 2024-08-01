@@ -1,6 +1,7 @@
 <?php
 namespace Pyther\Json;
 
+use Exception;
 use Pyther\Json\Attributes\JsonDateTime;
 use Pyther\Json\Exceptions\JsonException;
 
@@ -14,8 +15,30 @@ class JsonDeserializer extends BaseExecuter
     public function deserialize(string|array $jsonOrData, string|object $objectOrClass): ?object
     {
         $object = is_string($objectOrClass) ? static::createObject($objectOrClass) : $objectOrClass;
-        $data = is_string($jsonOrData) ? json_decode($jsonOrData, true, 512, \JSON_INVALID_UTF8_IGNORE) : $jsonOrData;
+        try {
+            $data = is_string($jsonOrData) ? json_decode($jsonOrData, true, 512, \JSON_INVALID_UTF8_IGNORE | \JSON_THROW_ON_ERROR) : $jsonOrData;
+        } catch (Exception $ex) {
+            throw new JsonException($ex->getMessage());
+        }
         return $this->fillObject($object, $data);
+    }
+
+    public function deserializeArrayOf(string|array $jsonOrData, string $itemClass): ?array
+    {
+        try {
+            $data = is_string($jsonOrData) ? json_decode($jsonOrData, true, 512, \JSON_INVALID_UTF8_IGNORE | \JSON_THROW_ON_ERROR) : $jsonOrData;
+        } catch (Exception $ex) {
+            throw new JsonException($ex->getMessage());
+        }
+        $result = [];
+        foreach ($data as $item) {
+            $object = static::createObject($itemClass);
+            if (!is_array($item)) {
+                throw new JsonException("Invalid Json. Array item is not a nested object!");
+            }
+            $result[] = $this->fillObject($object, $item);
+        }
+        return $result;
     }
 
     
@@ -82,13 +105,18 @@ class JsonDeserializer extends BaseExecuter
                     throw new JsonException("Invalid date/time format '$format'!", $name);
                 }
                 $object->{$name} = $dateTime;
-            } 
-            // c) special case: nested objects
+            }
+            // c) special case: enum
+            else if (enum_exists($typeInfo->type))
+            {
+                $object->{$name} = static::getEnum($typeInfo->type, $data[$jsonName], $name);
+            }
+            // d) special case: nested objects
             else if ($typeInfo->type != null && TypeInfo::isUserType($typeInfo->type)) {
                 $item = static::createObject($typeInfo->type, $reflObject->getNamespaceName());
                 $object->{$name} = $this->fillObject($item, $data[$jsonName]);
             } 
-            // d) default case
+            // e) default case
             else {
                 $object->{$name} = $data[$jsonName];
             }
@@ -113,6 +141,20 @@ class JsonDeserializer extends BaseExecuter
         } catch (\ArgumentCountError $ex) {
             throw new JsonException("Class '$fqn' does not have an empty constructor or a constructor with default arguments only!");
         }
+    }
+
+    private static function getEnum(string $enumClass, mixed $value, ?string $propertyName = null): mixed
+    {
+        if ($value === null) {
+            return null;
+        }
+        try {
+            $enumRefl = new \ReflectionEnum($enumClass);
+            return $enumRefl->getCase($value)->getValue();
+        } catch (Exception $ex) {
+            throw new JsonException($ex->getMessage(), $propertyName);
+        }
+        
     }
 
 }

@@ -1,13 +1,10 @@
 <?php
 namespace Demo;
 
-use DateTime;
-use Demo\Models\Order;
-use Demo\Models\Types;
 use Demo\Models\TypesTest;
 use Pyther\Json\Exceptions\JsonException;
-use Pyther\Json\Exceptions\JsonParsingException;
 use Pyther\Json\Json;
+use Pyther\Json\JsonDeserializeSettings;
 use Pyther\Json\JsonSettings;
 use Pyther\Json\NamingPolicies\CamelToKebabNamingPolicy;
 use Pyther\Json\NamingPolicies\CamelToPascalNamingPolicy;
@@ -22,14 +19,14 @@ $autoloader = require_once __DIR__."/../vendor/autoload.php";
 $autoloader->addPsr4('Demo\\', __DIR__);
 
 try {
-    $settings = new JsonSettings();
+    $settings = new JsonDeserializeSettings();
     $settings->naming = new CamelToPascalNamingPolicy();
     // $settings->naming = new CamelToSnakeNamingPolicy();
     // $settings->naming = new CamelToKebabNamingPolicy();
     // $order = Json::deserialize(file_get_contents("data/order.json"), Order::class, $settings);
     $order = Json::deserialize(file_get_contents("data/types.json"), TypesTest::class);
     var_dump($order);
-    $json = Json::Serialize($order);
+    $json = Json::serialize($order);
     file_put_contents("data/types2.json", $json);
     var_dump($json);
 } catch (JsonException $ex) {
