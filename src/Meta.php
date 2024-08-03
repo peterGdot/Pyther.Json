@@ -1,7 +1,6 @@
 <?php
 namespace Pyther\Json;
 
-use Pyther\Json\Attributes\Json as JsonAttribute;
 use Pyther\Json\Attributes\JsonIgnore;
 use Pyther\Json\Attributes\JsonType;
 
@@ -40,17 +39,35 @@ abstract class Meta
         }
         return false;
     }
-
-    public static function isExporIgnored(\ReflectionProperty $property): bool {
+    
+    /**
+     * Should we ignore this property during serialization?
+     *
+     * @param \ReflectionProperty $property The property to test against.
+     * @return boolean
+     */
+    public static function isSerializeIgnored(\ReflectionProperty $property): bool {
         $args = Meta::getPropertyMetaArguments($property, JsonIgnore::class);
         return $args !== null && (count($args) == 0 || $args[1] == true);
     }
 
-    public static function isImportIgnored(\ReflectionProperty $property): bool {
+    /**
+     * Should we ignore this property during deserialization?
+     *
+     * @param \ReflectionProperty $property The property to test against.
+     * @return boolean
+     */
+    public static function isDeserializeIgnored(\ReflectionProperty $property): bool {
         $args = Meta::getPropertyMetaArguments($property, JsonIgnore::class);
         return $args !== null && (count($args) < 2 || $args[1] == true);
     }
 
+    /**
+     * Returns the property type defined using the #[JsonType(...)] attriute.
+     *
+     * @param \ReflectionProperty $property
+     * @return string|null
+     */
     public static function getPropertyMetaType(\ReflectionProperty $property): ?string {
         $args = Meta::getPropertyMetaArguments($property, JsonType::class);
         return $args !== null && count($args) > 0 ? $args[0] : null;

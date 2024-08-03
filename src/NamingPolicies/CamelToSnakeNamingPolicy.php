@@ -1,6 +1,9 @@
 <?php
 namespace Pyther\Json\NamingPolicies;
 
+/**
+ * Convert "camelCase" to "snake_case".
+ */
 class CamelToSnakeNamingPolicy extends BaseNamingPolicy
 {
     public function convert(string $name): string {

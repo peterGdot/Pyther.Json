@@ -5,6 +5,9 @@ use Exception;
 use Pyther\Json\Attributes\JsonDateTime;
 use Pyther\Json\Exceptions\JsonException;
 
+/**
+ * @property JsonDeserializeSettings $settings
+ */
 class JsonDeserializer extends BaseExecuter
 {
     function __construct(?JsonDeserializeSettings $settings = null)
@@ -12,6 +15,13 @@ class JsonDeserializer extends BaseExecuter
         parent::__construct($settings ?? new JsonDeserializeSettings());
     }
 
+    /**
+     * Deserialize a json string or a deserialized json array into a class object.
+     *
+     * @param string|array $jsonOrData The json string or its decoded version.
+     * @param string|object $objectOrClass A class name or an already existing object of the class.
+     * @return object|null Returns the deserialized object on success.
+     */
     public function deserialize(string|array $jsonOrData, string|object $objectOrClass): ?object
     {
         $object = is_string($objectOrClass) ? static::createObject($objectOrClass) : $objectOrClass;
@@ -23,6 +33,13 @@ class JsonDeserializer extends BaseExecuter
         return $this->fillObject($object, $data);
     }
 
+    /**
+     * Deserialize an array of given objects.
+     *
+     * @param string|array $jsonOrData The json string or its decoded version.
+     * @param string $itemClass The class name of the array elements.
+     * @return array|null Returns the deserialized array on success.
+     */
     public function deserializeArrayOf(string|array $jsonOrData, string $itemClass): ?array
     {
         try {
@@ -41,7 +58,6 @@ class JsonDeserializer extends BaseExecuter
         return $result;
     }
 
-    
     /**
      * Fill an object with given data (recursive).
      *
@@ -58,7 +74,7 @@ class JsonDeserializer extends BaseExecuter
 
         $props = $reflObject->getProperties(
             \ReflectionProperty::IS_PUBLIC
-            | ($this->settings->includeProteced ? \ReflectionProperty::IS_PROTECTED : 0)
+            | ($this->settings->getIncludeProtected() ? \ReflectionProperty::IS_PROTECTED : 0)
         );
 
         foreach ($props as $prop)
@@ -66,7 +82,7 @@ class JsonDeserializer extends BaseExecuter
             if ($prop->isStatic()) continue;
 
             // #[JsonIgnore] => skip
-            if (Meta::isImportIgnored($prop)) continue;            
+            if (Meta::isDeserializeIgnored($prop)) continue;            
 
             // resolve name
             $name = $prop->getName();
@@ -88,43 +104,55 @@ class JsonDeserializer extends BaseExecuter
                 if ($typeInfo->type === null) {
                     throw new JsonException("Can't figure out array data type!", $name);
                 }
+                $value = $object->{$name} ?? [];
                 if (is_array($data[$jsonName])) {
-                    $object->{$name} ??= [];
                     foreach ($data[$jsonName] as $dataItem) {
                         $item = static::createObject($typeInfo->type, $reflObject->getNamespaceName());
-                        $object->{$name}[] = $this->fillObject($item, $dataItem);
+                        $value[] = $this->fillObject($item, $dataItem);
                     }
                 }
             }
             // b) special case: DateTime
             else if ($typeInfo->type == "DateTime") {
                 $dateTimeMetaFormat = Meta::getPropertyMetaArguments($prop, JsonDateTime::class);
-                $format = $dateTimeMetaFormat !== null ? $dateTimeMetaFormat[0] : $this->settings->dataTimeFormat;
+                $format = $dateTimeMetaFormat !== null ? $dateTimeMetaFormat[0] : $this->settings->getDateTimeFormat();
                 $dateTime = \DateTime::createFromFormat($format, $data[$jsonName]);
                 if ($dateTime === false) {
                     throw new JsonException("Invalid date/time format '$format'!", $name);
                 }
-                $object->{$name} = $dateTime;
+                $value = $dateTime;
             }
             // c) special case: enum
             else if ($typeInfo->type !== null && enum_exists($typeInfo->type))
             {
-                $object->{$name} = static::getEnum($typeInfo->type, $data[$jsonName], $name);
+                $value = static::getEnum($typeInfo->type, $data[$jsonName], $name);
             }
             // d) special case: nested objects
             else if ($typeInfo->type !== null && TypeInfo::isUserType($typeInfo->type)) {
                 $item = static::createObject($typeInfo->type, $reflObject->getNamespaceName());
-                $object->{$name} = $this->fillObject($item, $data[$jsonName]);
+                $value = $this->fillObject($item, $data[$jsonName]);
             } 
             // e) default case
-            else {
-                $object->{$name} = $data[$jsonName];
+            else
+            {
+                $value = $data[$jsonName];
             }
+            
+            $this->setValue($object, $value, $prop);
         }
 
         return $object;
     }
 
+    /**
+     * Create a new object by full qualified class name
+     * If the class wasn't found or doesn't offer an empty constructor or a constructor with default values only,
+     * an JsonException is thrown.
+     *
+     * @param string $fqn The full qualified class name or the class name only if $ns was given.
+     * @param string|null $ns The optional $ns if the full qualified was'n found.
+     * @return object Returns a new instance of the object, on success.
+     */
     private static function createObject(string $fqn, ?string $ns = null): object {        
         if (!class_exists($fqn) ) {
             if ($ns === null) {
@@ -143,10 +171,22 @@ class JsonDeserializer extends BaseExecuter
         }
     }
 
-    private static function getEnum(string $enumClass, mixed $value, ?string $propertyName = null): mixed
+    /**
+     * Get a new enum based on enum class name and enum value.
+     *
+     * @param string $enumClass
+     * @param mixed $value
+     * @param string|null $propertyName
+     * @return mixed
+     */
+    private function getEnum(string $enumClass, mixed $value, ?string $propertyName = null): mixed
     {
         if ($value === null) {
             return null;
+        }
+        if (is_array($value)) {
+            $policy = $this->settings?->getNamingPolicy();
+            $value = $value[$policy?->convert('name')] ?? $value[$policy?->convert('value')] ?? throw new JsonException("Value is not an Enumeration!", $propertyName);
         }
         try {
             $enumRefl = new \ReflectionEnum($enumClass);
@@ -157,7 +197,7 @@ class JsonDeserializer extends BaseExecuter
             // find by value
             // tryFrom seems to be buggy :/
             // $result = $enumClass::tryFrom($value);
-            if ($result === null  && $enumRefl->isBacked()) {
+            if ($result === null && $enumRefl->isBacked()) {
                 foreach ($enumRefl->getCases() as $case) {
                     if ($case->getBackingValue() == $value) {
                         return $case->getValue();

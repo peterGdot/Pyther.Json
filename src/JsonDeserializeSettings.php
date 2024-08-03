@@ -6,5 +6,5 @@ namespace Pyther\Json;
  */
 class JsonDeserializeSettings extends JsonSettings
 {
-    public $dateTimeAsString = true; 
+
 }

@@ -4,6 +4,7 @@ A lightweight JSON (de)serializer between json and a data model with the followi
 
 - support for nested arrays and objects
 - pre defined or custom naming policies
+- support for basic or backed enumerations.
 - meta/attribute support for
   - property exclusion
   - (array) type
@@ -106,7 +107,7 @@ use Pyther\Json\Attributes\JsonEnum;
 class MyClass
 {
     // parse this property by the given format.
-    #[JsonEnum(JsonEnum::Name)]
+    #[JsonEnum(EnumFormat::Name)]
     public Status $status;
 }
 ```

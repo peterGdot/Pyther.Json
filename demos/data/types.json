@@ -1,42 +1,45 @@
 {
-    "protectedProperty": 123,
-    "publicProperty": 123,
-    "intProperty": 123,
-    "intPropertyNullable": 123,
-    "stringProperty": "abc",
-    "stringPropertyNullable": "abc",
-    "intOrStringProperty": "abc123",
-    "intOrStringPropertyNullable": "abc123",
-    "dateTimeProperty": "1981-02-04T16:17:18.193Z",
-    "dateTimePropertyByMeta": "04/02/1981",
-    "orderItem": {
-        "sku": "123-456-789"
+    "PublicProperty": 123,
+    "IntProperty": 123,
+    "IntPropertyNullable": 123,
+    "StringProperty": "abc",
+    "StringPropertyNullable": "abc",
+    "IntOrStringProperty": "abc123",
+    "IntOrStringPropertyNullable": "abc123",
+    "DateTimeProperty": "1981-02-04T16:17:18+",
+    "DateTimePropertyByMeta": "04\/02\/1981",
+    "OrderItem": {
+        "Sku": "123-456-789",
+        "Parent": null
     },
-    "orderItemNullable":
-    {
-        "sku": "987-654-321"
+    "OrderItemNullable": {
+        "Sku": "987-654-321",
+        "Parent": null
     },
-    "typedArrayByHint": [
+    "TypedArrayByHint": [
         {
-            "sku": "111-222-333"
+            "Sku": "111-222-333",
+            "Parent": null
         },
         {
-            "sku": "444-555-666"
-        }   
+            "Sku": "444-555-666",
+            "Parent": null
+        }
     ],
-    "typedArrayByMeta":  [
+    "TypedArrayByMeta": [
         {
-            "sku": "333-222-111"
+            "Sku": "333-222-111",
+            "Parent": null
         },
         {
-            "sku": "666-555-444",
-            "parent":
-            {
-                "sku": "pa-re-nt"
-            }  
-        }   
+            "Sku": "666-555-444",
+            "Parent": {
+                "Sku": "pa-re-nt",
+                "Parent": null
+            }
+        }
     ],
-    "intByHint": 123,
-    "intNullableByHint" : 123,
-    "intByMeta": 123
+    "IntByHint": 123,
+    "IntNullableByHint": 123,
+    "IntByMeta": 123
 }

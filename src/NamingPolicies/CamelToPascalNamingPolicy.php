@@ -1,6 +1,9 @@
 <?php
 namespace Pyther\Json\NamingPolicies;
 
+/**
+ * Convert "camelCase" to "PasalCase".
+ */
 class CamelToPascalNamingPolicy extends BaseNamingPolicy
 {
     public function convert(string $name): string {

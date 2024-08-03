@@ -13,7 +13,7 @@ class TypesTest {
     private $privateProperty;
 
     // protected types are not ignored by default
-    protected $protectedProperty;
+    protected $protectedProperty = 123;
 
     // public non type property
     public $publicProperty;
@@ -60,18 +60,4 @@ class TypesTest {
 
     #[JsonType(\int::class)]
     public $intByMeta;
-
-
-
-
-    public array $exportType;
-
-    function __construct() {
-        $this->exportType = [
-            1, 1.23, "abc", new \DateTime(), 
-            [
-                1,2,3,4,5
-            ]
-        ];
-    }
 }

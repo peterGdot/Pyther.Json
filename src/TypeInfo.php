@@ -63,13 +63,6 @@ class TypeInfo {
         if (!$this->isNullable && $this->types != null) {
             $this->isNullable = in_array("null", $this->types);
         }
-
-        /*
-        echo "  type = ".$this->type."\n";
-        echo "  types = ".implode(", ", $this->types ?? [])."\n";
-        echo "  isArray = ".($this->isArray ? "yes" : "no")."\n"; 
-        echo "  nullable = ".($this->isNullable ? "yes" : "no")."\n"; 
-        */
     }
 
     /**

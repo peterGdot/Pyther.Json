@@ -1,8 +1,10 @@
 <?php
 namespace Pyther\Json;
 
+use JsonException;
 use Pyther\Json\Attributes\JsonDateTime;
 use Pyther\Json\Attributes\JsonEnum;
+use Pyther\Json\Types\EnumFormat;
 
 /**
  * @property JsonSerializeSettings $settings
@@ -14,6 +16,12 @@ class JsonSerializer extends BaseExecuter
         parent::__construct($settings ?? new JsonSerializeSettings());
     }
 
+    /**
+     * Serialize an object or array the the encoded json version.
+     *
+     * @param object|array $objectOrArray The object or array to encode.
+     * @return string|null Returns the json string version on success, null otherwise.
+     */
     public function serialize(object|array $objectOrArray): ?string
     {
         if (is_array($objectOrArray)) {
@@ -21,9 +29,23 @@ class JsonSerializer extends BaseExecuter
         } else {
             $data = $this->serializeObject((object)$objectOrArray);
         }
-        return json_encode($data, \JSON_PRETTY_PRINT);
+        try {
+            return json_encode(
+                $data, 
+                \JSON_THROW_ON_ERROR
+                | $this->settings->getPrettyPrint() ? \JSON_PRETTY_PRINT : 0
+            );
+        } catch (\Exception $ex) {
+            throw new JsonException($ex->getMessage());
+        }
     }
 
+    /**
+     * Serialize a given object.
+     *
+     * @param object $object The object to serialize.
+     * @return array|null
+     */
     private function serializeObject(object $object): ?array
     {
         $data = [];
@@ -32,7 +54,7 @@ class JsonSerializer extends BaseExecuter
 
         $props = $reflObject->getProperties(
             \ReflectionProperty::IS_PUBLIC
-            | ($this->settings->includeProteced ? \ReflectionProperty::IS_PROTECTED : 0)
+            | ($this->settings->getIncludeProtected() ? \ReflectionProperty::IS_PROTECTED : 0)
         );
 
         foreach ($props as $prop)
@@ -40,7 +62,7 @@ class JsonSerializer extends BaseExecuter
             if ($prop->isStatic()) continue;
 
             // #[JsonIgnore] => skip
-            if (Meta::isImportIgnored($prop)) continue;
+            if (Meta::isSerializeIgnored($prop)) continue;
             
             // resolve name
             $name = $prop->getName();
@@ -49,38 +71,45 @@ class JsonSerializer extends BaseExecuter
             // gather type informations
             $typeInfo = new TypeInfo($prop);
 
-            if ($object->{$name} === null) {
+            $value = $this->getValue($object, $prop);
+
+            if ($value === null) {
                 $data[$jsonName] = null;
             }
             // a) special case: arrays
             else if ($typeInfo->isArray) {
-                $data[$jsonName] = $this->serializeArray($object->{$name});
+                $data[$jsonName] = $this->serializeArray($value);
             }
             // b) special case: DateTime
             else if ($typeInfo->type == "DateTime") {
                 $dateTimeMetaFormat = Meta::getPropertyMetaArguments($prop, JsonDateTime::class);
-                $format = $dateTimeMetaFormat !== null ? $dateTimeMetaFormat[0] : $this->settings->dataTimeFormat;
-                $dateTimeFormated = $object->{$name}->format($format);
+                $format = $dateTimeMetaFormat !== null ? $dateTimeMetaFormat[0] : $this->settings->getDateTimeFormat();
+                $dateTimeFormated = $value->format($format);
                 $data[$jsonName] = $dateTimeFormated;
             }
             // c) special case: enum
             else if ($typeInfo->type !== null && enum_exists($typeInfo->type))
             {
-                $data[$jsonName] = $this->serializeEnum($prop, $object->{$name});
+                $data[$jsonName] = $this->serializeEnum($prop, $value, $typeInfo->type);
             }            
             // d) special case: nested objects
             else if ($typeInfo->type != null && TypeInfo::isUserType($typeInfo->type)) {
-                $data[$jsonName] = $this->serializeObject($object->{$name});
+                $data[$jsonName] = $this->serializeObject($value);
             } 
             // e) default case
             else {
-                $data[$jsonName] = $object->{$name};
+                $data[$jsonName] = $value;
             }
         }
-
         return $data;
     }
 
+    /**
+     * Serialize a given array.
+     *
+     * @param array $array The array to serialize.
+     * @return array|null
+     */
     private function serializeArray(array $array): ?array
     {
         $settings = $this->settings;
@@ -88,8 +117,8 @@ class JsonSerializer extends BaseExecuter
         $data = [];
         foreach ($array as $item) {
             if ($item instanceof \Datetime) {
-                if ($settings->dateTimeAsString) {
-                    $dateTimeFormated = $item->format($settings->dataTimeFormat);
+                if ($settings->getDateTimeAsString()) {
+                    $dateTimeFormated = $item->format($settings->getDateTimeFormat());
                     $data[] = $dateTimeFormated;
                 } else {
                     $data[] = $item;
@@ -104,18 +133,27 @@ class JsonSerializer extends BaseExecuter
         return $data;
     }
 
-    private function serializeEnum(\ReflectionProperty $property, $value) {
+    /**
+     * Serialize a given enumeration value.
+     *
+     * @param \ReflectionProperty $property
+     * @param mixed $value The enumeration value.
+     * @param string $enumClass The enumeration full qualified class name.
+     * @return mixed Returns the enumeration value.
+     */
+    private function serializeEnum(\ReflectionProperty $property, mixed $value, string $enumClass): mixed {
         if ($value === null) {
             return null;
         }
         $enumMeta = Meta::getPropertyMetaArguments($property, JsonEnum::class);
-        $enumFormat = $enumMeta !== null ? $enumMeta[0] : ($this->settings->enumFormat ?? JsonEnum::Value);
-        if ($enumFormat === JsonEnum::Name) {
+        $enumFormat = $enumMeta !== null ? $enumMeta[0] : $this->settings->getEnumFormat();
+        if ($enumFormat === EnumFormat::Name) {
             return $value->name ?? $value;
-        } else if ($enumFormat === JsonEnum::Full) {
+        } else if ($enumFormat === EnumFormat::Full) {
             return $this->serializeObject($value);
         } else {
-            return $value;    
+            $enumRefl = new \ReflectionEnum($enumClass);
+            return $enumRefl->isBacked() ? $value : $value->name;
         }
     }
 }
