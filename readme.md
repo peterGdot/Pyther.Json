@@ -1,20 +1,28 @@
 # Pyther.Json
 
-A lightweight JSON (de)serializer between json and a data model with the following features:
+A lightweight (de)serializer between json strings and data models with the following features:
 
 - support for nested arrays and objects
 - pre defined or custom naming policies
 - support for basic or backed enumerations.
 - meta/attribute support for
+  - property renaming 
   - property exclusion
-  - (array) type
+  - (array) data type
   - datetime format
   - enum format
+- several settings like 
+  - include protected properties
+  - skip null values
+  - skip empty arrays
+  - enum format
+  - and more ...
 - takes documentation "@var" hints into account
 - no external dependencies  
+- straightforward to use
 
 Requirements:
-- PHP >= 8.1
+- PHP 8.1+
 
 ## Examples:
 

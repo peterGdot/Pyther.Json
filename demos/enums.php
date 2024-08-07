@@ -3,9 +3,8 @@ namespace Demo;
 
 use JsonException;
 use Pyther\Json\Json;
-use Pyther\Json\JsonSerializeSettings;
 use Pyther\Json\Attributes\JsonEnum;
-use Pyther\Json\JsonDeserializeSettings;
+use Pyther\Json\JsonSettings;
 use Pyther\Json\NamingPolicies\CamelToPascalNamingPolicy;
 use Pyther\Json\Types\EnumFormat;
 
@@ -89,14 +88,14 @@ try {
 }
 
 function serializeTest($object): string {
-    $settings = new JsonSerializeSettings();
+    $settings = new JsonSettings();
     $settings->setEnumFormat(EnumFormat::Name);
     $settings->setNamingPolicy(new CamelToPascalNamingPolicy());
     return Json::serialize($object, $settings);
 }
 
 function deserializeTest(string $json): EnumTest {
-    $settings = new JsonDeserializeSettings();
+    $settings = new JsonSettings();
     $settings->setNamingPolicy(new CamelToPascalNamingPolicy());
     return Json::deserialize($json, EnumTest::class, $settings);
 }

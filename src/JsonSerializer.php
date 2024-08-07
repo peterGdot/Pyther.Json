@@ -6,16 +6,8 @@ use Pyther\Json\Attributes\JsonDateTime;
 use Pyther\Json\Attributes\JsonEnum;
 use Pyther\Json\Types\EnumFormat;
 
-/**
- * @property JsonSerializeSettings $settings
- */
 class JsonSerializer extends BaseExecuter 
 {
-    function __construct(?JsonSerializeSettings $settings = null)
-    {
-        parent::__construct($settings ?? new JsonSerializeSettings());
-    }
-
     /**
      * Serialize an object or array the the encoded json version.
      *
@@ -72,12 +64,15 @@ class JsonSerializer extends BaseExecuter
             $typeInfo = new TypeInfo($prop);
 
             $value = $this->getValue($object, $prop);
+            
+            if ($value === null && $this->settings->getSkipNull()) continue;
 
             if ($value === null) {
                 $data[$jsonName] = null;
             }
             // a) special case: arrays
             else if ($typeInfo->isArray) {
+                if (empty($value) && $this->settings->getSkipEmptyArrays()) continue;
                 $data[$jsonName] = $this->serializeArray($value);
             }
             // b) special case: DateTime

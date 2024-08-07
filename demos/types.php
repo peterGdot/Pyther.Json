@@ -4,8 +4,7 @@ namespace Demo;
 use Demo\Models\TypesTest;
 use Pyther\Json\Exceptions\JsonException;
 use Pyther\Json\Json;
-use Pyther\Json\JsonDeserializeSettings;
-use Pyther\Json\JsonSerializeSettings;
+use Pyther\Json\JsonSettings;
 use Pyther\Json\NamingPolicies\CamelToPascalNamingPolicy;
 use Pyther\Json\Types\EnumFormat;
 
@@ -22,7 +21,7 @@ try {
     $obj = deserializeTest(file_get_contents("data/types.json"));
     echo "Object:\n";
     var_dump($obj);
-
+    
     // serialize
     $json = serializeTest($obj);
     echo "\n\nJSON:\n";
@@ -35,14 +34,16 @@ try {
 }
 
 function serializeTest($object): string {
-    $settings = new JsonSerializeSettings();
+    $settings = new JsonSettings();
     $settings->setEnumFormat(EnumFormat::Name);
     $settings->setNamingPolicy(new CamelToPascalNamingPolicy());
+    $settings->setSkipNull(true);
+    $settings->setSkipEmptyArray(true);
     return Json::serialize($object, $settings);
 }
 
 function deserializeTest(string $json): TypesTest {
-    $settings = new JsonDeserializeSettings();
+    $settings = new JsonSettings();
     $settings->setNamingPolicy(new CamelToPascalNamingPolicy());
     return Json::deserialize($json, TypesTest::class, $settings);
 }

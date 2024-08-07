@@ -56,8 +56,12 @@ class TypesTest {
      * @var integer|null
      */
     public $intNullableByHint;
-    
 
     #[JsonType(\int::class)]
     public $intByMeta;
+
+    public ?string $nullValue = null;
+
+    #[JsonType(\int::class)]
+    public array $emptyArray = [];
 }

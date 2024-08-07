@@ -6,7 +6,7 @@
     "StringPropertyNullable": "abc",
     "IntOrStringProperty": "abc123",
     "IntOrStringPropertyNullable": "abc123",
-    "DateTimeProperty": "1981-02-04T16:17:18+",
+    "DateTimeProperty": "1981-02-04T16:17:18+02:00",
     "DateTimePropertyByMeta": "04\/02\/1981",
     "OrderItem": {
         "Sku": "123-456-789",

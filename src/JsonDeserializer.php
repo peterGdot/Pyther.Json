@@ -5,16 +5,8 @@ use Exception;
 use Pyther\Json\Attributes\JsonDateTime;
 use Pyther\Json\Exceptions\JsonException;
 
-/**
- * @property JsonDeserializeSettings $settings
- */
 class JsonDeserializer extends BaseExecuter
 {
-    function __construct(?JsonDeserializeSettings $settings = null)
-    {
-        parent::__construct($settings ?? new JsonDeserializeSettings());
-    }
-
     /**
      * Deserialize a json string or a deserialized json array into a class object.
      *

@@ -1,6 +1,6 @@
 {
     "name": "pyther/json",
-    "description": "JSON to/from model (de)serialization",
+    "description": "A lightweight (de)serializer between json strings and data models.",
     "type": "library",
     "keywords": [
         "JSON",

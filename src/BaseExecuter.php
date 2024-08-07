@@ -12,7 +12,7 @@ abstract class BaseExecuter
 
     function __construct(?JsonSettings $settings = null)
     {
-        $this->settings = $settings;
+        $this->settings = $settings ?? new JsonSettings();
     }
     
     /**
