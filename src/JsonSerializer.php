@@ -72,7 +72,7 @@ class JsonSerializer extends BaseExecuter
             }
             // a) special case: arrays
             else if ($typeInfo->isArray) {
-                if (empty($value) && $this->settings->getSkipEmptyArrays()) continue;
+                if (empty($value) && $this->settings->getSkipEmptyArray()) continue;
                 $data[$jsonName] = $this->serializeArray($value);
             }
             // b) special case: DateTime
