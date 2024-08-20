@@ -11,11 +11,12 @@ class JsonSettings
 {
     // flags
     private const INCLUDE_PROTECTED_FLAG = 1;
+    private const SKIP_INHERITED_PROPERTIES = 2;    
     // on serialization only
-    private const USE_PRETTY_PRINT = 2;
-    private const DATETIME_AS_STRING = 4;
-    private const SKIP_NULL = 8;
-    private const SKIP_EMPTY_ARRAY = 16;
+    private const USE_PRETTY_PRINT = 4;
+    private const DATETIME_AS_STRING = 8;
+    private const SKIP_NULL = 16;
+    private const SKIP_EMPTY_ARRAY = 32;
 
     private int $flags = self::USE_PRETTY_PRINT | self::DATETIME_AS_STRING;
     private ?BaseNamingPolicy $namingPolicy = null;
@@ -68,6 +69,20 @@ class JsonSettings
     public function getDateTimeFormat(): string {
         return $this->dataTimeFormat;
     }
+
+    /**
+     * Define to skip ingerited properties (false by default).
+     * @param boolean $value
+     * @return static
+     */
+    public function setSkipInheritedProperties(bool $value = true): static {
+        $this->flags = $value ? $this->flags | self::SKIP_INHERITED_PROPERTIES : $this->flags & ~self::SKIP_INHERITED_PROPERTIES;
+        return $this;
+    }
+
+    public function getSkipInheritedProperties(): bool {
+        return ($this->flags & self::SKIP_INHERITED_PROPERTIES) != 0;
+    }    
 
     #region on serialization only   
     

@@ -83,6 +83,9 @@ class JsonDeserializer extends BaseExecuter
             // if no data available => skip;
             if (!isset($data[$jsonName])) continue;
 
+            // skip inherited properties?
+            if ($this->settings->getSkipInheritedProperties() && $prop->getDeclaringClass()->getName() != $reflObject->getName()) continue;            
+
             // gather type informations
             $typeInfo = new TypeInfo($prop);
 
@@ -145,7 +148,9 @@ class JsonDeserializer extends BaseExecuter
      * @param string|null $ns The optional $ns if the full qualified was'n found.
      * @return object Returns a new instance of the object, on success.
      */
-    private static function createObject(string $fqn, ?string $ns = null): object {        
+    private static function createObject(string $fqn, ?string $ns = null): object
+    { 
+        $fqn = str_replace("|null", "", $fqn);
         if (!class_exists($fqn) ) {
             if ($ns === null) {
                 throw new JsonException("Class '$fqn' not found!");

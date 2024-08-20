@@ -65,7 +65,11 @@ class JsonSerializer extends BaseExecuter
 
             $value = $this->getValue($object, $prop);
             
+            // skip properties with null values
             if ($value === null && $this->settings->getSkipNull()) continue;
+
+            // skip inherited properties?
+            if ($this->settings->getSkipInheritedProperties() && $prop->getDeclaringClass()->getName() != $reflObject->getName()) continue;
 
             if ($value === null) {
                 $data[$jsonName] = null;
@@ -77,10 +81,14 @@ class JsonSerializer extends BaseExecuter
             }
             // b) special case: DateTime
             else if ($typeInfo->type == "DateTime") {
-                $dateTimeMetaFormat = Meta::getPropertyMetaArguments($prop, JsonDateTime::class);
-                $format = $dateTimeMetaFormat !== null ? $dateTimeMetaFormat[0] : $this->settings->getDateTimeFormat();
-                $dateTimeFormated = $value->format($format);
-                $data[$jsonName] = $dateTimeFormated;
+                if ($this->settings->getDateTimeAsString()) {
+                    $dateTimeMetaFormat = Meta::getPropertyMetaArguments($prop, JsonDateTime::class);
+                    $format = $dateTimeMetaFormat !== null ? $dateTimeMetaFormat[0] : $this->settings->getDateTimeFormat();
+                    $dateTimeFormated = $value->format($format);
+                    $data[$jsonName] = $dateTimeFormated;
+                } else {
+                    $data[$jsonName] = $value;
+                }
             }
             // c) special case: enum
             else if ($typeInfo->type !== null && enum_exists($typeInfo->type))
@@ -107,13 +115,11 @@ class JsonSerializer extends BaseExecuter
      */
     private function serializeArray(array $array): ?array
     {
-        $settings = $this->settings;
-
         $data = [];
         foreach ($array as $item) {
             if ($item instanceof \Datetime) {
-                if ($settings->getDateTimeAsString()) {
-                    $dateTimeFormated = $item->format($settings->getDateTimeFormat());
+                if ($this->settings->getDateTimeAsString()) {
+                    $dateTimeFormated = $item->format($this->settings->getDateTimeFormat());
                     $data[] = $dateTimeFormated;
                 } else {
                     $data[] = $item;

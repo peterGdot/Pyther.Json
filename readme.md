@@ -15,7 +15,8 @@ A lightweight (de)serializer between json strings and data models with the follo
   - include protected properties
   - skip null values
   - skip empty arrays
-  - enum format
+  - skip inherited properties
+  - enum format (name, value or full)
   - and more ...
 - takes documentation "@var" hints into account
 - no external dependencies  

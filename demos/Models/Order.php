@@ -8,14 +8,14 @@ use Pyther\Json\Attributes\JsonType;
 class Order
 {
     #[Json("Id")]
-    public int $id2;
+    public int $id2 = 0;
 
-    public string|int|null $externId; 
+    public string|int|null $externId = null; 
  
     /**
      * @var string
      */
-    public $channel;    
+    public $channel = "Demo Channel";    
 
     #[JsonIgnore(true, true)]
     public string $ignore;
@@ -24,5 +24,5 @@ class Order
     #[JsonType(OrderItem::class)]
     public array $items = [];
 
-    public OrderItem $primaryItem;
+    public ?OrderItem $primaryItem = null;
 }
