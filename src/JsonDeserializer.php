@@ -2,6 +2,7 @@
 namespace Pyther\Json;
 
 use Exception;
+use Pyther\Json\Attributes\JsonComplete;
 use Pyther\Json\Attributes\JsonDateTime;
 use Pyther\Json\Exceptions\JsonException;
 
@@ -136,6 +137,8 @@ class JsonDeserializer extends BaseExecuter
             $this->setValue($object, $value, $prop);
         }
 
+        $this->finalize($object);
+
         return $object;
     }
 
@@ -205,7 +208,32 @@ class JsonDeserializer extends BaseExecuter
         } catch (Exception $ex) {
             throw new JsonException($ex->getMessage(), $propertyName);
         }
-        
+    }
+
+    /**
+     * Find and invoke the objects #[JsonFinalize] method (if any).
+     *
+     * @param [type] $object
+     * @return void
+     */
+    public function finalize($object)
+    {
+        $reflObject = new \ReflectionObject($object);
+        $methods = $reflObject->getMethods();
+
+        foreach ($methods as $method)
+        {
+            $attributes = $method->getAttributes(JsonComplete::class);
+            if (count($attributes) > 0) {
+                $methodName = $method->getName();                
+                $method = $reflObject->getMethod($methodName);
+                if (version_compare(PHP_VERSION, '8.1.0') < 0) {
+                    $method->setAccessible(true);
+                }
+                $method->invoke($object);
+                break;
+            }
+        }
     }
 
 }
