@@ -25,6 +25,11 @@ A lightweight (de)serializer between json strings and data models with the follo
 Requirements:
 - PHP 8.1+
 
+## Installation
+Install the [Composer Package](https://packagist.org/packages/pyther/json)
+
+`composer require pyther/json`
+
 ## Examples:
 
 ### Deserialization
