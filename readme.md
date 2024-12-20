@@ -44,6 +44,113 @@ Install the [Composer Package](https://packagist.org/packages/pyther/json)
     $json = Json::serialize($order);
 ```
 
+### Optional Settings
+```php
+$settings = new JsonSettings();
+
+// set optional naming policy, default is none (json attrbiutes equals object attribute names).
+// supported policies: CamelToPascalNamingPolicy, CamelToSnakeNamingPolicy, CamelToKebabNamingPolicy, PascalToCamelNamingPolicy
+$settings->setNamingPolicy(new CamelToPascalNamingPolicy());
+
+// Disable json indention (enabled by default).
+$settings->setPrettyPrint(false);
+
+// Enable or disable to serialize DateTime as string (enabled by default).
+$settings->setDateTimeAsString(false);
+
+// Set the default date time format (\DateTime::W3C by default).
+// This can be overwriten per Property using "#[JsonDateTime(...)]"
+$settings->setDateTimeFormat(\DateTime::W3C)
+
+// Defines the default serialization format for enumerations (EnumFormat::Value by default). 
+// This can be overridden using the "JsonEnum" meta tag.
+// values are: EnumFormat::Value, EnumFormat::Name, EnumFormat::Full
+$settings->setEnumFormat(EnumFormat::Value)
+
+// Define to skip null values (false by default).
+$settings->setSkipNull(true);
+
+// Define to skip empty arrays (false by defaut).
+$settings->setSkipEmptyArray(true);
+
+// Set to true, to include protected members (false by default).
+$settings->setIncludeProtected(true)
+
+// Define to skip inherited properties (false by default).
+$settings->setSkipInheritedProperties(true);
+
+
+$json = Json::serialize($order, $settings);
+
+```
+
+## Enums
+
+```php
+enum Status : int {
+    case Inactive = 0;
+    case Active = 1;
+}
+
+```
+
+### EnumFormat::Name
+```php
+class EnumTest {
+    #[JsonEnum(EnumFormat::Name)]
+    public Status $status;
+}
+
+// or set global for all enums
+$settings->setEnumFormat(EnumFormat::Name);
+```
+
+```json
+JSON:
+{
+    "Status": "Active"
+}
+```
+
+### EnumFormat::Value
+```php
+class EnumTest {
+    #[JsonEnum(EnumFormat::Value)]
+    public Status $status;
+}
+
+// or set global for all enums
+$settings->setEnumFormat(EnumFormat::Value);
+```
+
+```json
+JSON:
+{
+    "Status": 1
+}
+```
+
+### EnumFormat::Full
+```php
+class EnumTest {
+    #[JsonEnum(EnumFormat::Full)]
+    public Status $status;
+}
+
+// or set global for all enums
+$settings->setEnumFormat(EnumFormat::Full);
+```
+
+```json
+JSON:
+{
+    "Status": {
+        "Name": "Active",
+        "Value": 1
+    }
+}
+```
+
 ## Meta/Attributes
 
 ### Json
