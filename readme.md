@@ -104,9 +104,8 @@ class EnumTest {
 // or set global for all enums
 $settings->setEnumFormat(EnumFormat::Name);
 ```
-
+Result:
 ```json
-JSON:
 {
     "Status": "Active"
 }
@@ -123,8 +122,8 @@ class EnumTest {
 $settings->setEnumFormat(EnumFormat::Value);
 ```
 
+Result:
 ```json
-JSON:
 {
     "Status": 1
 }
@@ -141,8 +140,8 @@ class EnumTest {
 $settings->setEnumFormat(EnumFormat::Full);
 ```
 
+Result:
 ```json
-JSON:
 {
     "Status": {
         "Name": "Active",
