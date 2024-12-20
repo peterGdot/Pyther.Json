@@ -42,7 +42,7 @@ Requirements:
 ## Meta/Attributes
 
 ### Json
-The attribute allow two manually match a single property with a json attribute. This attribute will ignore the selected naming policy. 
+The attribute allows to manually match a single property with a json attribute. This attribute will ignore the selected naming policy. 
 
 ```php
 use Pyther\Json\Attributes\Json;
@@ -56,7 +56,7 @@ class MyClass
 ```
 
 ### JsonIgnore
-Allow to ignore a single property during serialization, deserialization or both.
+Allows to ignore a single property during serialization, deserialization or both.
 
 ```php
 use Pyther\Json\Attributes\JsonIgnore;
@@ -78,7 +78,7 @@ class MyClass
 ```
 
 ### JsonType
-Define a datatype for a single property. This is especially useful for arrays due the lack of type hint support for arrays in php.
+Defines a datatype for a single property. This is especially useful for arrays due the lack of type hint support for arrays in php.
 
 ```php
 use Pyther\Json\Attributes\JsonType;
@@ -96,7 +96,7 @@ class MyClass
 ```
 
 ### JsonDateTime
-Allow to define a date/time format for a single property.
+Allows to define a date/time format for a single property.
 ```php
 use Pyther\Json\Attributes\JsonDateTime;
 
@@ -109,7 +109,7 @@ class MyClass
 ```
 
 ### JsonEnum
-Allow to define the enum serialization format for a single property.
+Allows to define the enum serialization format for a single property.
 ```php
 use Pyther\Json\Attributes\JsonEnum;
 
@@ -119,4 +119,21 @@ class MyClass
     #[JsonEnum(EnumFormat::Name)]
     public Status $status;
 }
+```
+
+### JsonComplete
+Allows a post process when the object (and all child objects) are ready.
+
+```php
+use Pyther\Json\Attributes\JsonEnum;
+
+class MyClass
+{
+    // Any parameterless function with any name you want. 
+    #[JsonComplete]
+    public function onComplete() {
+        // $this is fully parsed and ready to use here
+    }
+}
+
 ```
