@@ -122,13 +122,15 @@ class MyClass
 ```
 
 ### JsonComplete
-Allows a post process when the object (and all child objects) are ready.
+Allows a post process when the object and all child objects are ready.
 
 ```php
-use Pyther\Json\Attributes\JsonEnum;
+use Pyther\Json\Attributes\JsonComplete;
 
 class MyClass
 {
+    // ...
+
     // Any parameterless function with any name you want. 
     #[JsonComplete]
     public function onComplete() {
