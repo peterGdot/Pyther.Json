@@ -64,4 +64,11 @@ class TypesTest {
 
     #[JsonType(\int::class)]
     public array $emptyArray = [];
+
+    #[JsonType(\string::class)]
+    /*
+     * @var string[]
+     */    
+    public array $stringArray = [];
+
 }

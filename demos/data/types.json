@@ -41,5 +41,6 @@
     ],
     "IntByHint": 123,
     "IntNullableByHint": 123,
-    "IntByMeta": 123
+    "IntByMeta": 123,
+    "StringArray": ["abc", "def", "123"]
 }

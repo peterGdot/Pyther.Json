@@ -95,6 +95,10 @@ class JsonDeserializer extends BaseExecuter
                 continue;
             }
 
+            if ($name == "stringArray") {
+                var_dump($typeInfo);
+                var_dump(TypeInfo::isBuildInType($typeInfo->type));
+            }
             // a) special case: arrays
             if ($typeInfo->isArray) {
                 if ($typeInfo->type === null) {
@@ -103,8 +107,12 @@ class JsonDeserializer extends BaseExecuter
                 $value = $object->{$name} ?? [];
                 if (is_array($data[$jsonName])) {
                     foreach ($data[$jsonName] as $dataItem) {
-                        $item = static::createObject($typeInfo->type, $reflObject->getNamespaceName());
-                        $value[] = $this->fillObject($item, $dataItem);
+                        if (TypeInfo::isBuildInType($typeInfo->type)) {
+                            $value[] = $dataItem;
+                        } else {
+                            $item = static::createObject($typeInfo->type, $reflObject->getNamespaceName());
+                            $value[] = $this->fillObject($item, $dataItem);                            
+                        }
                     }
                 }
             }
