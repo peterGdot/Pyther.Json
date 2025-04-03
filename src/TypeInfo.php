@@ -2,7 +2,7 @@
 namespace Pyther\Json;
 
 /**
- * Class thats parse and holds type informations.
+ * Class to parse and hold type informations.
  */
 class TypeInfo {
 
@@ -27,7 +27,6 @@ class TypeInfo {
      * @return void
      */
     private function parse(\ReflectionProperty $property): void {
-        // echo "Property '".$property->getName()."':\n";
         $metaTypes = Meta::getPropertyMetaType($property);
         if ($metaTypes !== null) {
             $this->types = explode("|", $metaTypes);
@@ -93,9 +92,16 @@ class TypeInfo {
      * @return string|null
      */
     private static function getTypeFromHint(\ReflectionProperty $property): ?string {
+        // get type from doc comment, return first non "null" match of multiple types
         if (preg_match('/@var\s+([^\s]+)/', $property->getDocComment(), $matches)) {
-            list(, $type) = $matches;
-            return $type != "" ? $type : null;
+            list(, $types) = $matches;
+            foreach (explode('|', $types) as $type) {
+                $type = trim($type);
+                if ($type != "") {
+                    return $type;
+                }
+            } 
+            return null;
         }
         return null;
     }

@@ -94,11 +94,6 @@ class JsonDeserializer extends BaseExecuter
             if (in_array($typeInfo->type, $ignoredTypes)) {
                 continue;
             }
-
-            if ($name == "stringArray") {
-                var_dump($typeInfo);
-                var_dump(TypeInfo::isBuildInType($typeInfo->type));
-            }
             // a) special case: arrays
             if ($typeInfo->isArray) {
                 if ($typeInfo->type === null) {
